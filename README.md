@@ -1,6 +1,5 @@
 # Web-Crawler
 
-
 A multi-threaded webcrawler that reads the html of multiple webpages and keeps a count of "important words" from each one.The webcrawler will also save the html of each webpage that was read.
 
 ## Functions
@@ -11,14 +10,16 @@ A multi-threaded webcrawler that reads the html of multiple webpages and keeps a
 • Input Handling: Read URLs from an input file (urls.txt).
 • Output Files: Store HTML pages and generate a word count report.
 
-**Language**: C
+
 
 ## Packages
--Pthreads
--libcurl
+- pthreads
+- libcurl
+
+**Language**: C
 
 ## Contributors
--**Henry Kern**
--**Cristopher Guaman**
--**Zohaib Khan**
--**Nick Avila**
+- **Henry Kern**
+- **Cristopher Guaman**
+- **Zohaib Khan**
+- **Nick Avila**
