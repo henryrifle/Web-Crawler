@@ -10,4 +10,31 @@
 // Important words to count
 const char *important_words[WORD_COUNT] = {"Data", "Science", "Algorithm"};
 
-printf("Startling Web Crawler.....")
+// Structure to hold thread data
+typedef struct {
+    char *url;
+    int thread_id;
+} ThreadData;
+
+void *fetch_html(void *arg){
+    ThreadData *data = (ThreadData *)arg;
+    CURL *curl;
+    FILE *file;
+    char filename[30];
+    snprintf(filename, sizeof(filename), "page%d.html", data->thread_id);
+    curl = curl_easy_init();
+    if(curl) {
+        file = fopen(filename, "wb");
+        if (!file){
+            fprintf(stderr, "Could not open file %s for writing\n", filename);
+            return NULL;
+        }
+        //continue with curl
+    }
+
+}
+
+int main(void){
+printf("Startling Web Crawler");
+return 0;
+}
