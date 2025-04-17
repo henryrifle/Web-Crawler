@@ -9,3 +9,5 @@
 
 // Important words to count
 const char *important_words[WORD_COUNT] = {"Data", "Science", "Algorithm"};
+
+printf("Startling Web Crawler.....")
