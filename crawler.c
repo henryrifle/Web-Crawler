@@ -16,13 +16,18 @@ typedef struct {
     int thread_id;
 } ThreadData;
 
+// Function to write fetched HTML 
+size_t write_callback(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+    return fwrite(ptr, size, nmemb, stream);
+}
+
 
 void fetch_webpage(const char* url) {
     CURL *curl;
     FILE *file;
     
     printf("Fetching URL: %s\n", url);
-    
+    //currently only implemented for one url  at a time in order to start other parts of the project
     curl = curl_easy_init();
     if(curl) {
         
@@ -59,8 +64,8 @@ void fetch_webpage(const char* url) {
     }
 }
 
-// Simple main function
+
 int main(void) {
-    fetch_webpage("https://example.com");
+    fetch_webpage("https://www.amazon.com/");
     return 0;
 }
