@@ -10,6 +10,10 @@ A multi-threaded webcrawler that reads the html of multiple webpages and keeps a
 - Input Handling: Read URLs from an input file (urls.txt).
 - Output Files: Store HTML pages and generate a word count report.
 
+## How to run 
+-gcc crawler.c -o crawler -lcurl
+-./crawler
+
 
 
 ## Packages
