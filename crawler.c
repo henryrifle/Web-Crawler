@@ -6,6 +6,7 @@
 
 #define MAX_URLS 100
 #define WORD_COUNT 3
+#define MAX_URL_LENGTH 2048
 
 // Important words to count
 const char *important_words[WORD_COUNT] = {"Data", "Science", "Algorithm"};
@@ -53,8 +54,41 @@ void fetch_webpage(const char* url) {
         curl_easy_cleanup(curl);
     }
 }
-//simple main implementation
+
+int read_urls(const char *filename, char urls[MAX_URLS][MAX_URL_LENGTH]) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        perror("Failed to open urls.txt");
+        return 0;
+    }
+
+    int count = 0;
+    while (count < MAX_URLS && fgets(urls[count], MAX_URL_LENGTH, file)) {
+        // Remove trailing newline character
+        urls[count][strcspn(urls[count], "\r\n")] = 0;
+        count++;
+    }
+
+    fclose(file);
+    return count;
+}
+
 int main(void) {
-    fetch_webpage("https://example.com");
+    char urls[MAX_URLS][MAX_URL_LENGTH];
+    int url_count = read_urls("urls.txt", urls);
+
+    if (url_count == 0) {
+        printf("No URLs found.\n");
+        return 1;
+    }
+
+    // Test: print the URLs read
+    printf("Read %d URLs:\n", url_count);
+    for (int i = 0; i < url_count; i++) {
+        printf("%d: %s\n", i + 1, urls[i]);
+    }
+
+    // Later: Create threads to fetch each URL
+
     return 0;
 }
