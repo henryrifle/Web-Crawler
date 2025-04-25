@@ -1,6 +1,6 @@
 all:
-	gcc -std=c11 -pedantic -pthread -lcurl crawler.c -o crawler
+	gcc -std=c11 -pedantic crawler.c -o crawler -pthread -lcurl
 clean:
-	rm -f crawler page*.html
+	rm -f crawler webpage*.html
 run:
 	./crawler

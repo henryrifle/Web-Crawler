@@ -11,8 +11,9 @@ A multi-threaded webcrawler that reads the html of multiple webpages and keeps a
 - Output Files: Store HTML pages and generate a word count report.
 
 ## How to run 
--gcc crawler.c -o crawler -lcurl
--./crawler
+-make all (to build crawler object file)
+-make run (to run crawler)
+-make clean (to clear webpage files)
 
 
 
