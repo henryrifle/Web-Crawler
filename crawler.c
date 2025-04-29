@@ -129,15 +129,46 @@ void* fetch_webpage(void* arg) {
 }
 
 /**
+ * Counts the number of times a specific word appears in a given file
+ * 
+ * @param filename  Name of the file to scan
+ * @param word      The word to search for
+ * @return          The number of occurrences found
+ */
+int count_word_occurrences(const char *filename, const char *word) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        perror("Failed to open HTML file for word counting");
+        return 0;
+    }
+
+    int count = 0;
+    char buffer[4096]; // read in chunks
+
+    while (fgets(buffer, sizeof(buffer), file)) {
+        char *ptr = buffer;
+        while ((ptr = strstr(ptr, word)) != NULL) {
+            count++;
+            ptr += strlen(word); // move past the found word
+        }
+    }
+
+    fclose(file);
+    return count;
+}
+
+
+/**
  * Main function - program entry point
  * Reads URLs from file and creates threads to fetch each URL
  */
 int main(void) {
     // Array to store URLs read from file
     char urls[MAX_URLS][MAX_URL_LENGTH];
+    //Read URLs from file
     int url_count = read_urls("urls.txt", urls);
 
-    // Check if any URLs were read
+    // Check if any URLs were succesfully read
     if (url_count == 0) {
         printf("No URLs found.\n");
         return 1;
@@ -162,7 +193,7 @@ int main(void) {
             continue;
         }
         
-        // Make a copy of the URL string
+        // Duplicate or make a copy of the URL string
         data->url = strdup(urls[i]);
         if (!data->url) {
             fprintf(stderr, "Failed to allocate memory for URL\n");
@@ -170,7 +201,7 @@ int main(void) {
             continue;
         }
         
-        // Set thread ID
+        // Set or assign a unique thread ID
         data->thread_id = i + 1;
         
         // Create the thread
@@ -186,5 +217,22 @@ int main(void) {
         pthread_join(threads[i], NULL);
     }
 
+    // After fetching is done, count word occurrences
+    printf("\nWord Occurrences:\n");
+
+    // Loop through each fetched HTML file
+    for (int i = 0; i < url_count; i++) {
+        char filename[50];
+        // Create filename
+        snprintf(filename, sizeof(filename), "webpage_%d.html", i + 1);
+
+        printf("In file %s:\n", filename);
+
+        // Loop through each important word
+        for (int j = 0; j < WORD_COUNT; j++) {
+            int count = count_word_occurrences(filename, important_words[j]);
+            printf("  %s: %d times\n", important_words[j], count);
+        }
+    }
     return 0;
 }
