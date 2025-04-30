@@ -1,3 +1,4 @@
+#define _GNU_SOURCE // Enables GNU-specific extensions like strcasestr() before including standard headers
 #include <stdio.h>       // Standard I/O functions
 #include <stdlib.h>      // Memoru allocation, exit, etc
 #include <pthread.h>     // POSIX threads for multithreading
@@ -6,6 +7,9 @@
 
 // Enable support for optional functions like strdup
 #define __STDC_WANT_LIB_EXT1__ 1
+
+// Global mutex used to synchronize console output between threads (prevents mixed prints)
+pthread_mutex_t console_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Declare strdup function if not available (for portability across compilers)
 char* strdup(const char* s);
@@ -86,11 +90,13 @@ void* fetch_webpage(void* arg) {
     FILE *file;    // Declare a FILE pointer to save the fetched HTML content
     char filename[50];    // Declare a buffer to store the filename for saving the HTML content
     
+    pthread_mutex_lock(&console_mutex); // Lock the mutex to safely print from this thread (prevents output from overlapping with other threads)
     // Print status message indicating the start of the fetch operation for the thread
     printf("Thread %d: Fetching: %s\n", data->thread_id, data->url);
+    pthread_mutex_unlock(&console_mutex); // Unlock the mutex after printing
     
     // Create a unique filename for the output HTML file based on the thread ID
-    snprintf(filename, sizeof(filename), "webpage_%d.html", data->thread_id);
+    snprintf(filename, sizeof(filename), "page%d.html", data->thread_id);
     
     // Initialize CURL for HTTP requests
     curl = curl_easy_init();
@@ -121,6 +127,10 @@ void* fetch_webpage(void* arg) {
         if(res != CURLE_OK) {
             // If the request failed (e.g., due to a bad URL or network error), print an error message
             fprintf(stderr, "Thread %d: Error: %s\n", data->thread_id, curl_easy_strerror(res));
+        } else {
+            pthread_mutex_lock(&console_mutex); // Lock the mutex to safely print from this thread (prevents output from overlapping with other threads)
+            printf("Thread %d: Successfully fetched %s\n", data->thread_id, data->url);     // Print success message for this thread
+            pthread_mutex_unlock(&console_mutex); // Unlock the mutex after printing
         }
 
         // Close the file after writing the HTML content
@@ -161,7 +171,8 @@ int count_word_occurrences(const char *filename, const char *word) {
         char *ptr = buffer;    // Pointer to search within the line
 
         // Search for the word repeatedly in the current line
-        while ((ptr = strstr(ptr, word)) != NULL) {
+        while ((ptr = strcasestr(ptr, word)) != NULL) {         // Search for the target word in the current buffer line (case-insensitive match)
+        // strcasestr returns a pointer to the first occurrence of 'word' in 'ptr', or NULL if not found                                    
             count++;    // Increment count when word is found
             ptr += strlen(word);    // Move past the current match to continue searching
         }
@@ -225,6 +236,14 @@ int main(void) {
             free(data);    // And free memory allocated for the ThreadData structure
             continue;    // Then skip this thread
         }
+        // Validate the URL format before creating a thread
+        // Skip if the URL is too short or does not start with "http"
+        if (strlen(data->url) < 5 || strstr(data->url, "http") != data->url) {
+            fprintf(stderr, "Skipping invalid url: %s\n", data->url); // Log skipped invalid URL
+            free(data->url); // Free duplicated URL string
+            free(data); // Free thread data structure
+            continue; // Skip to next URL
+        }
         
         // Assign a unique thread ID to this thread's data
         data->thread_id = i + 1;
@@ -253,7 +272,7 @@ int main(void) {
         char filename[50];    // Buffer to hold generated filename
         
         // Create filename based on the thread index ("webpage_1.html", "webpage_2.html", etc.)
-        snprintf(filename, sizeof(filename), "webpage_%d.html", i + 1);
+        snprintf(filename, sizeof(filename), "page%d.html", i + 1);
         
         // Display name of file being analyzed
         printf("In file %s:\n", filename);
