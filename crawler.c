@@ -264,26 +264,33 @@ int main(void) {
         pthread_join(threads[i], NULL);
     }
 
-    // Now that all pages have been fetched and saved, begin word counting
+        // Now that all pages have been fetched and saved, begin word counting
     printf("\nWord Occurrences:\n");
 
-    // For each saved HTML file corresponding to the downloaded web pages
+    // Array to hold total counts for each important word across all files
+    int total_counts[WORD_COUNT] = {0};
+
+    // Loop through each saved HTML file
     for (int i = 0; i < url_count; i++) {
-        char filename[50];    // Buffer to hold generated filename
-        
-        // Create filename based on the thread index ("webpage_1.html", "webpage_2.html", etc.)
+        char filename[50]; // Buffer for filename like "page1.html"
         snprintf(filename, sizeof(filename), "page%d.html", i + 1);
-        
-        // Display name of file being analyzed
+
+        // Print header for current file
         printf("In file %s:\n", filename);
 
-        // For each important word defined in the important_words array
+        // Count each important word in this file
         for (int j = 0; j < WORD_COUNT; j++) {
-            // Call count_word_occurrences to count this word in the current file
             int count = count_word_occurrences(filename, important_words[j]);
-            // Print the word and how many times it appeared
+            total_counts[j] += count; // Accumulate total for summary
             printf("  %s: %d times\n", important_words[j], count);
         }
     }
+
+    // Print a summary of total word occurrences across all files
+    printf("\nTotal Word Occurrences Across All Files:\n");
+    for (int i = 0; i < WORD_COUNT; i++) {
+        printf("  %s: %d times\n", important_words[i], total_counts[i]);
+    }
+
     return 0;
 }
